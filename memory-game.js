@@ -52,7 +52,6 @@ function createCards(colors) {
 /** Flip a card face-up. */
 
 function flipCard(card) {
-  // ... you need to write this ...
   card.style.backgroundColor = card.className;
 }
 
@@ -65,10 +64,12 @@ function unFlipCard(card) {
 /** Handle clicking on a card: this could be first-card or second-card. */
 let last = undefined;
 let second = false;
+let lockBoard = false;
 
 function handleCardClick(evt) {
   let background = evt.target.style.backgroundColor;
-  if (evt.target.classList.contains(background)) {
+  console.log(lockBoard);
+  if (evt.target.classList.contains(background) || (lockBoard == true)) {
     return console.log('foo');
   } else {
     flipCard(evt.target);
@@ -79,10 +80,15 @@ function handleCardClick(evt) {
     last = evt.target;
   } else {
     if (last.className !== evt.target.className) {
+      lockBoard = true;
       setTimeout(unFlipCard, FOUND_MATCH_WAIT_MSECS, last);
       setTimeout(unFlipCard, FOUND_MATCH_WAIT_MSECS, evt.target);
+      setTimeout(function (){
+        lockBoard = false;
+      }, FOUND_MATCH_WAIT_MSECS);
       second = false;
       last = undefined;
+
     }
     second = false;
     last = undefined;
