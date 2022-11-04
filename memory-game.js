@@ -8,10 +8,27 @@ const COLORS = [
   "red", "blue", "green", "orange", "purple",
 ];
 
-const colors = shuffle(COLORS);
+let gameBoard = document.getElementById('#game');
 
-createCards(colors);
+let count;
 
+let start = document.createElement('button');
+start.textContent = 'Start Game!';
+start.addEventListener('click', function(){
+  const shuffled = shuffle(COLORS);
+  createCards(shuffled);
+  start.remove();
+});
+
+let body = document.querySelector('body');
+body.append(start);
+
+// Get possible amount of matchess with count and keep track of matched cards
+// with matched
+
+
+let matched = 0;
+let guesses = 0;
 
 /** Shuffle array items in-place and return shuffled array. */
 
@@ -47,6 +64,13 @@ function createCards(colors) {
     card.addEventListener('click', handleCardClick);
     gameBoard.append(card);
   }
+
+  count = gameBoard.children.length / 2;
+  console.log(count);
+  let score = document.createElement('h3');
+  score.setAttribute('id', 'score');
+  score.textContent = "Total number of guesses: " + guesses;
+  gameBoard.append(score);
 }
 
 /** Flip a card face-up. */
@@ -79,6 +103,9 @@ function handleCardClick(evt) {
     second = true;
     last = evt.target;
   } else {
+    guesses++;
+    let score = document.getElementById('score');
+    score.textContent = "Total number of guesses: " + guesses;
     if (last.className !== evt.target.className) {
       lockBoard = true;
       setTimeout(unFlipCard, FOUND_MATCH_WAIT_MSECS, last);
@@ -89,9 +116,50 @@ function handleCardClick(evt) {
       second = false;
       last = undefined;
 
+    } else {
+      second = false;
+      last = undefined;
+      matched++;
+      console.log(matched);
+      if (matched === count) {
+        const body = document.querySelector('body');
+        let restart = document.createElement('button');
+        let message = document.createElement('h3');
+        message.textContent = "You Win!";
+        restart.textContent = 'Restart Game!';
+        restart.addEventListener('click', function(){
+          const divs = document.querySelectorAll('#game > div');
+          for (let div of divs) {
+            div.remove();
+          }
+          score.remove();
+          guesses = 0;
+          const shuffled = shuffle(COLORS);
+          createCards(shuffled);
+          message.remove();
+          restart.remove();
+          matched = 0;
+        });
+        body.append(message);
+        body.append(restart);
+
+        if (!localStorage.getItem('highScore')) {
+          localStorage.setItem('highScore', guesses);
+          setTimeout(alert('New high score! ' + guesses + ' guesses!'), 1);
+        } else {
+          const current = localStorage.getItem('highScore');
+          if (guesses < current) {
+            setTimeout(alert('New high score! ' + guesses + ' guesses!'), 1);
+            localStorage.setItem('highScore', guesses);
+          } else {
+            setTimeout(alert('Current high score: ' + current + ' guesses!'), 1);
+          }
+        }
+      }
+
     }
-    second = false;
-    last = undefined;
   }
+
+
 
 }
